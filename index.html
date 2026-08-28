@@ -299,6 +299,8 @@ JotForm.paymentExtrasOnTheFly([null,{"name":"heading","qid":"1","text":"Formular
 
     const nextButton = cedulaInput.closest(".form-section").querySelector(".form-pagebreak-next");
 
+    const widgetIframe = document.getElementById("customFieldFrame_18");
+
     // Función para cambiar el estado del botón (Bloqueado/Desbloqueado)
     function setButtonState(enabled) {
       if (!nextButton) return;
@@ -314,23 +316,33 @@ JotForm.paymentExtrasOnTheFly([null,{"name":"heading","qid":"1","text":"Formular
 
    
   
-    // Escuchar mientras el usuario escribe (input) para bloquear rápido
-    cedulaInput.addEventListener("input", function() {
-        const valor = this.value.trim();
-        if (valor.length === 10) {
-            const esValida = esCedulaValida(valor);
-            if (esValida) {
-              this.style.borderColor = "#28a745"; // Borde verde si es correcta
-              setButtonState(true);
-            } else {
-              this.style.borderColor = "#dc3545"; // Borde rojo si es incorrecta
-              setButtonState(false);
-            }
-        } else {
-            // Si no tiene 10 dígitos, bloqueamos preventivamente el botón
+    // Esperar a que el iframe cargue completamente sus elementos internos
+    widgetIframe.addEventListener("load", function () {
+    const iframeDoc = widgetIframe.contentDocument || widgetIframe.contentWindow.document;
+
+    // Elementos internos del widget (IDs estándar dentro del iframe de Jotform)
+    const searchInput = iframeDoc.getElementById("srcInput");
+    const autofillBtn = iframeDoc.querySelector(".autofill-button") || iframeDoc.getElementById("searchButton");
+
+    if (autofillBtn) {
+      // Escuchar el clic ÚNICAMENTE en el botón de búsqueda/autocompletar
+      autofillBtn.addEventListener("click", function () {
+        // Dar un pequeño tiempo (300ms) para que el widget ejecute la búsqueda interna
+        setTimeout(function () {
+          const valorCedula = searchInput.value.trim();
+          const esValida = esCedulaValida(valorCedula);
+
+          // Verificar si el widget encontró datos evaluando un campo lleno o respuesta exitosa
+          // Si la cédula es matemáticamente válida y se encontró en el Excel:
+          if (esValida) {
+            setButtonState(true);
+          } else {
             setButtonState(false);
-        }
-    });
+          }
+        }, 300);
+      });
+    }
+  });
 
     
 
