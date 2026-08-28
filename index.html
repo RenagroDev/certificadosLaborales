@@ -295,75 +295,46 @@ JotForm.paymentExtrasOnTheFly([null,{"name":"heading","qid":"1","text":"Formular
 
 
   function validarCedulaPersonal(){
-    const inputCedula = document.getElementById("input_18");
+    const cedulaInput = document.getElementById("input_18");
+
+    const nextButton = cedulaInput.closest(".form-section").querySelector(".form-pagebreak-next");
+
+    // Función para cambiar el estado del botón (Bloqueado/Desbloqueado)
+    function setButtonState(enabled) {
+      if (!nextButton) return;
     
-    // valida cedula y bloquea el boton siguiente si es incorrecta
-
-    function gestionarBotonSiguiente(bloquear) {
-        // Buscamos el botón de la página actual
-        const botonSiguiente = inputCedula.closest(".form-section").querySelector(".form-pagebreak-next");
-        
-        if (botonSiguiente) {
-            botonSiguiente.disabled = bloquear;
-
-            
-
-            // Estética: bajamos la opacidad si está bloqueado
-            botonSiguiente.style.opacity = bloquear ? "0.5" : "1";
-            botonSiguiente.style.cursor = bloquear ? "not-allowed" : "pointer";
-
-            //enviar mensaje a label sobre el boton
-              const pageInfo = inputCedula.closest(".form-section").querySelector(".pageInfo");
-              if (pageInfo) {
-                  pageInfo.textContent = bloquear ? "Por favor, ingrese una cédula válida para continuar" : "";
-                  pageInfo.style.color = "red";
-              }
-        }
+      nextButton.disabled = !enabled;
+      nextButton.style.opacity = enabled ? "1" : "0.4";
+      nextButton.style.cursor = enabled ? "pointer" : "not-allowed";
+      nextButton.style.pointerEvents = enabled ? "auto" : "none";
     }
 
-    function gestionarErrorNativo(elemento, mensaje, mostrar) {
-        const contenedorLinea = elemento.closest(".form-line");
-        gestionarBotonSiguiente(mostrar); // Bloquea si hay error, desbloquea si no
-        
-        if (mostrar) {
-            contenedorLinea.classList.add("form-line-error");
-            let errorDiv = contenedorLinea.querySelector(".form-error-message");
-            if (!errorDiv) {
-                errorDiv = document.createElement("div");
-                errorDiv.className = "form-error-message";
-                contenedorLinea.appendChild(errorDiv);
-            }
-            errorDiv.innerHTML = '<span class="form-error-arrow"></span><div class="form-error-content">' + mensaje + '</div>';
-            errorDiv.style.display = "block";
-        } else {
-            contenedorLinea.classList.remove("form-line-error");
-            const errorDiv = contenedorLinea.querySelector(".form-error-message");
-            if (errorDiv) errorDiv.style.display = "none";
-        }
-    }
+    // Bloquear el botón al cargar la página por primera vez
+    setButtonState(false);
+
    
+  
     // Escuchar mientras el usuario escribe (input) para bloquear rápido
-    inputCedula.addEventListener("input", function() {
+    cedulaInput.addEventListener("input", function() {
         const valor = this.value.trim();
         if (valor.length === 10) {
-            if (!esCedulaValida(valor)) {
-                gestionarErrorNativo(inputCedula, "Cédula ecuatoriana incorrecta", true);
+            const esValida = esCedulaValida(valor);
+            if (esValida) {
+              this.style.borderColor = "#28a745"; // Borde verde si es correcta
+              setButtonState(true);
             } else {
-                gestionarErrorNativo(inputCedula, "", false);
+              this.style.borderColor = "#dc3545"; // Borde rojo si es incorrecta
+              setButtonState(false);
             }
         } else {
             // Si no tiene 10 dígitos, bloqueamos preventivamente el botón
-            gestionarBotonSiguiente(true);
+            setButtonState(false);
         }
     });
 
-    // Validación final al salir del campo
-    inputCedula.addEventListener("change", function() {
-        const valor = this.value.trim();
-        if (valor === "" || !esCedulaValida(valor)) {
-            gestionarErrorNativo(inputCedula, "Cédula ecuatoriana incorrecta", true);
-        }
-    });
+    
+
+    
   }
 
 document.addEventListener("DOMContentLoaded", function() {
