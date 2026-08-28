@@ -295,11 +295,9 @@ JotForm.paymentExtrasOnTheFly([null,{"name":"heading","qid":"1","text":"Formular
 
 
   function validarCedulaPersonal(){
-    const cedulaInput = document.getElementById("input_18");
+  const widgetIframe = document.getElementById("customFieldFrame_18");
 
-    const nextButton = cedulaInput.closest(".form-section").querySelector(".form-pagebreak-next");
-
-    const widgetIframe = document.getElementById("customFieldFrame_18");
+  const nextButton = document.getElementById("form-pagebreak-next_7");
 
     // Función para cambiar el estado del botón (Bloqueado/Desbloqueado)
     function setButtonState(enabled) {
